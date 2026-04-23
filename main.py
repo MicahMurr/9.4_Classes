@@ -34,7 +34,7 @@ class Player(Turtle):
         screen.onkeypress(self.turn_right, right_key)
         screen.onkey(self.fire,fire_key)
     def fire(self):
-        
+        self.bullets.append(Bullet(self))
     def turn_left(self):
         self.left(10)
 
@@ -63,6 +63,22 @@ p2 = Player(100,0,"blue",screen, "Right","Left")
 while p1.alive and p2.alive:
     p1.move()
     p2.move()
+class Bullet(Turtle):
+    def __init__(self, x, y, color, screen, right_key, left_key,fire_key):
+        super().__init__()
+        self.ht()
+        self.speed(0)
+        self.color(color)
+        self.penup()
+        self.goto(x,y)
+        self.setheading(90)
+        self.shape("turtle")
+        self.bullets = []
+        self.alive = True
+    def move():
+        self.st
 
+    def die():
+        self.ht()
 
 screen.exitonclick()
