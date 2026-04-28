@@ -13,7 +13,7 @@ def playing_area():
     pen.goto(-240, 240)
     pen.pendown()
     pen.begin_fill()
-    for _ in range(4):
+    for i in range(4):
         pen.forward(480)
         pen.right(90)
     pen.end_fill()
@@ -46,25 +46,27 @@ class Bullet(Turtle):
             self.player.bullets.remove(self)
 
 class Player(Turtle):
-    def __init__(self, x, y, color, screen, right_key, left_key, fire_key):
+    def __init__(self, x, y, start_color, screen, right_key, left_key, fire_key):
         super().__init__()
         self.ht()
         self.speed(0)
-        self.color(color)
+        self.color(start_color)
         self.penup()
         self.goto(x, y)
         self.setheading(90)
         self.shape("turtle")
         self.bullets = []
+        
         self.health = 3
         self.alive = True
+        self.colors = [start_color, "yellow", "red"]
+        
         self.st()
         screen.onkeypress(self.turn_left, left_key)
         screen.onkeypress(self.turn_right, right_key)
         screen.onkey(self.fire, fire_key)
 
     def fire(self):
-        if len(self.bullets) < 5:
             self.bullets.append(Bullet(self))
 
     def turn_left(self):
@@ -79,6 +81,15 @@ class Player(Turtle):
             self.setheading(180 - self.heading())
         if self.ycor() > 230 or self.ycor() < -230:
             self.setheading(-self.heading())
+            
+    def take_damage(self):
+        self.health -= 1
+        if self.health > 0:
+            color_index = 3 - self.health
+            self.color(self.colors[color_index])
+        else:
+            self.alive = False
+            self.ht()
 
 screen = Screen()
 screen.bgcolor("black")
@@ -87,22 +98,24 @@ screen.listen()
 
 playing_area()
 
-p1 = Player(-100, 0, "red", screen, "d", "a", "w")
+p1 = Player(-100, 0, "green", screen, "d", "a", "w")
 p2 = Player(100, 0, "blue", screen, "Right", "Left", "Up")
 
-while p1.alive and p2.alive:
-    p1.move()
-    p2.move()
+players = [p1, p2]
+
+while len(players) == 2:
+    for player in players:
+        player.move()
     
     i = 0
     while i < len(p1.bullets):
         b = p1.bullets[i]
         b.move()
         if b.alive and b.distance(p2) < 20:
-            p2.health -= 1
+            p2.take_damage()
             b.die()
-            if p2.health <= 0:
-                p2.alive = False
+            if not p2.alive and p2 in players:
+                players.remove(p2)
         elif b.alive:
             i += 1
 
@@ -111,15 +124,11 @@ while p1.alive and p2.alive:
         b = p2.bullets[j]
         b.move()
         if b.alive and b.distance(p1) < 20:
-            p1.health -= 1
+            p1.take_damage()
             b.die()
-            if p1.health <= 0:
-                p1.alive = False
+            if not p1.alive and p1 in players:
+                players.remove(p1)
         elif b.alive:
             j += 1
-    if p1.alive == False:
-        p1.ht()
-    if p2.alive == False:
-        p2.ht()
 
 screen.exitonclick()
